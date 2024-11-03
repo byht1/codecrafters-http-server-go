@@ -6,6 +6,7 @@ type Response struct {
 	headers    Headers
 	StatusCode int
 	Body       string
+	File       []byte
 }
 
 func NewResponse() Response {

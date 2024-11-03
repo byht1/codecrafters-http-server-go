@@ -6,23 +6,25 @@ import (
 )
 
 type Request struct {
-	Method   string
-	Path     string
-	Protocol string
-	Params   map[string]string
-	headers  map[string]string
+	Method    string
+	Path      string
+	Protocol  string
+	StaticDir string
+	Params    map[string]string
+	headers   map[string]string
 }
 
-func NewRequest(reqBuffer []byte) Request {
+func NewRequest(reqBuffer []byte, staticDir string) Request {
 	originalRequest := strings.Split(string(reqBuffer), "\n")
 	info := strings.Split(originalRequest[0], " ")
 
 	req := Request{
-		Method:   info[0],
-		Path:     info[1],
-		Protocol: info[2],
-		Params:   make(map[string]string),
-		headers:  make(map[string]string),
+		Method:    info[0],
+		Path:      info[1],
+		Protocol:  info[2],
+		StaticDir: staticDir,
+		Params:    make(map[string]string),
+		headers:   make(map[string]string),
 	}
 
 	for _, h := range originalRequest[1:] {

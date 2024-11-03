@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
 	"os"
@@ -11,6 +12,9 @@ import (
 
 func main() {
 	fmt.Println("Logs from your program will appear here!")
+
+	directory := flag.String("directory", "", "description")
+	flag.Parse()
 
 	l, err := net.Listen("tcp", "0.0.0.0:4221")
 	if err != nil {
@@ -27,12 +31,12 @@ func main() {
 			os.Exit(1)
 		}
 
-		go handleConnection(conn, *trie)
+		go handleConnection(conn, *trie, *directory)
 	}
 
 }
 
-func handleConnection(conn net.Conn, tree controllers.Trie) {
+func handleConnection(conn net.Conn, tree controllers.Trie, staticDir string) {
 	defer conn.Close()
 
 	buffer := make([]byte, 1024)
@@ -42,7 +46,7 @@ func handleConnection(conn net.Conn, tree controllers.Trie) {
 		return
 	}
 
-	request := httpProsecc.NewRequest(buffer)
+	request := httpProsecc.NewRequest(buffer, staticDir)
 	response := httpProsecc.NewResponse()
 
 	endpoint, params := tree.FindRoute(request.Method, request.Path)

@@ -13,15 +13,20 @@ const (
 )
 
 func BuilderResponse(conn net.Conn, req *Request, res *Response) {
-	protocol := fmt.Sprintf("HTTP/1.1 %v %v\r\n", res.StatusCode, GetMessage(res.StatusCode))
+	protocol := getProtocol(res.StatusCode)
 	bodyBytes := []byte(res.Body)
 	var headers []string
 
 	if _, isOk := res.GetHeader(contentType); !isOk {
 		res.SetHeader(contentType, "text/plain")
 	}
-	res.SetHeader(contentLength, strconv.Itoa(len(bodyBytes)))
 
+	if len(res.File) != 0 {
+		res.SetHeader(contentType, "application/octet-stream")
+		bodyBytes = res.File
+	}
+
+	res.SetHeader(contentLength, strconv.Itoa(len(bodyBytes)))
 	for key, value := range res.GetAllHeaders() {
 		headers = append(headers, fmt.Sprintf("%v: %v", key, value))
 	}
@@ -37,4 +42,8 @@ func BuilderResponse(conn net.Conn, req *Request, res *Response) {
 		return
 	}
 
+}
+
+func getProtocol(statusCode int) string {
+	return fmt.Sprintf("HTTP/1.1 %v %v\r\n", statusCode, GetMessage(statusCode))
 }
