@@ -10,6 +10,7 @@ type Request struct {
 	Path      string
 	Protocol  string
 	StaticDir string
+	Body      string
 	Params    map[string]string
 	headers   map[string]string
 }
@@ -17,6 +18,7 @@ type Request struct {
 func NewRequest(reqBuffer []byte, staticDir string) Request {
 	originalRequest := strings.Split(string(reqBuffer), "\n")
 	info := strings.Split(originalRequest[0], " ")
+	bodyFirstLine := 0
 
 	req := Request{
 		Method:    info[0],
@@ -27,10 +29,19 @@ func NewRequest(reqBuffer []byte, staticDir string) Request {
 		headers:   make(map[string]string),
 	}
 
-	for _, h := range originalRequest[1:] {
+	for i, h := range originalRequest[1:] {
+		if strings.TrimSpace(h) == "" {
+			bodyFirstLine = i + 1
+			break
+		}
+
 		headerLine := strings.Split(h, " ")
 		name := strings.ToLower(headerLine[0][:len(headerLine[0])-1])
 		req.headers[name] = strings.TrimSpace(strings.Join(headerLine[1:], " "))
+	}
+
+	if req.Method != "GET" {
+		req.Body = strings.TrimSpace(strings.Join(originalRequest[bodyFirstLine:], " "))
 	}
 
 	return req

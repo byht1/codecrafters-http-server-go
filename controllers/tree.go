@@ -23,7 +23,8 @@ func NewTrie() *Trie {
 	trie.AddRoute(rootEndpoint)
 	trie.AddRoute(echoEndpoint)
 	trie.AddRoute(userAgentEndpoint)
-	trie.AddRoute(files)
+	trie.AddRoute(readFile)
+	trie.AddRoute(createFile)
 
 	return &trie
 }

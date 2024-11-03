@@ -6,6 +6,8 @@ import (
 	"net"
 	"os"
 	"path"
+	"strconv"
+	"strings"
 
 	httpProsecc "github.com/codecrafters-io/http-server-starter-go/pkg/http-prosecc"
 )
@@ -30,7 +32,7 @@ var userAgentEndpoint = NewEndpoint("GET", "/user-agent", func(conn net.Conn, re
 	res.Body = userAgent
 })
 
-var files = NewEndpoint("GET", "/files/:file", func(conn net.Conn, req *httpProsecc.Request, res *httpProsecc.Response) {
+var readFile = NewEndpoint("GET", "/files/:file", func(conn net.Conn, req *httpProsecc.Request, res *httpProsecc.Response) {
 	file, err := os.Open(path.Join(req.StaticDir, req.Params["file"]))
 	if err != nil {
 		fmt.Printf("error opening file: %v\n", err)
@@ -47,4 +49,31 @@ var files = NewEndpoint("GET", "/files/:file", func(conn net.Conn, req *httpPros
 
 	res.StatusCode = 200
 	res.File = byteData
+})
+
+var createFile = NewEndpoint("POST", "/files/:file", func(conn net.Conn, req *httpProsecc.Request, res *httpProsecc.Response) {
+	value, _ := req.GetHeader(httpProsecc.ContentLength)
+	size, err := strconv.Atoi(value)
+	if err != nil || size <= 0 {
+		res.StatusCode = 422
+		res.Body = "Invalid data"
+		return
+	}
+
+	writeFile, err := os.Create(path.Join(req.StaticDir, req.Params["file"]))
+	if err != nil {
+		fmt.Printf("error when creating an file: %v", err)
+		res.StatusCode = 500
+		return
+	}
+	defer writeFile.Close()
+
+	limitedReader := io.LimitReader(strings.NewReader(req.Body), int64(size))
+	_, err = io.Copy(writeFile, limitedReader)
+	if err != nil {
+		fmt.Printf("error when writing data: %v", err)
+		res.StatusCode = 500
+		return
+	}
+	res.StatusCode = 201
 })

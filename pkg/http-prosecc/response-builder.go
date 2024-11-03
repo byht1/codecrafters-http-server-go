@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	contentType   = "Content-Type"
-	contentLength = "Content-Length"
+	ContentType   = "Content-Type"
+	ContentLength = "Content-Length"
 )
 
 func BuilderResponse(conn net.Conn, req *Request, res *Response) {
@@ -17,16 +17,16 @@ func BuilderResponse(conn net.Conn, req *Request, res *Response) {
 	bodyBytes := []byte(res.Body)
 	var headers []string
 
-	if _, isOk := res.GetHeader(contentType); !isOk {
-		res.SetHeader(contentType, "text/plain")
+	if _, isOk := res.GetHeader(ContentType); !isOk {
+		res.SetHeader(ContentType, "text/plain")
 	}
 
 	if len(res.File) != 0 {
-		res.SetHeader(contentType, "application/octet-stream")
+		res.SetHeader(ContentType, "application/octet-stream")
 		bodyBytes = res.File
 	}
 
-	res.SetHeader(contentLength, strconv.Itoa(len(bodyBytes)))
+	res.SetHeader(ContentLength, strconv.Itoa(len(bodyBytes)))
 	for key, value := range res.GetAllHeaders() {
 		headers = append(headers, fmt.Sprintf("%v: %v", key, value))
 	}
