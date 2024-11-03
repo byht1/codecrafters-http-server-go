@@ -4,16 +4,15 @@ import (
 	"path"
 )
 
-type Method string
-
 type Request struct {
-	Method   Method
+	Method   string
 	Path     string
 	Protocol string
+	Params   map[string]string
 }
 
 func NewRequest(method, path, protocol string) Request {
-	return Request{Method(method), path, protocol}
+	return Request{method, path, protocol, make(map[string]string)}
 }
 
 func (r *Request) GetKey() string {

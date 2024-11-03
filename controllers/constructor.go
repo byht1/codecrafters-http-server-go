@@ -1,14 +1,8 @@
 package controllers
 
-import (
-	"net"
-
-	httpProsecc "github.com/codecrafters-io/http-server-starter-go/pkg/http-prosecc"
-)
-
-func NewEndpoint(method, path string, fn func(conn net.Conn)) *Endpoint {
+func NewEndpoint(method, path string, fn RunFunc) *Endpoint {
 	return &Endpoint{
-		Method: httpProsecc.Method(method),
+		Method: method,
 		Path:   path,
 		Run:    fn,
 	}

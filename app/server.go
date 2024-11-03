@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/codecrafters-io/http-server-starter-go/config"
 	"github.com/codecrafters-io/http-server-starter-go/controllers"
 	httpProsecc "github.com/codecrafters-io/http-server-starter-go/pkg/http-prosecc"
 )
@@ -20,6 +19,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	trie := controllers.NewTrie()
+
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -27,12 +28,12 @@ func main() {
 			os.Exit(1)
 		}
 
-		go handleConnection(conn)
+		go handleConnection(conn, *trie)
 	}
 
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, tree controllers.Trie) {
 	defer conn.Close()
 
 	buffer := make([]byte, 1024)
@@ -46,13 +47,15 @@ func handleConnection(conn net.Conn) {
 	info := strings.Split(originalRequest[0], " ")
 
 	request := httpProsecc.NewRequest(info[0], info[1], info[2])
+	response := httpProsecc.NewResponse()
 
-	endpoint, isOk := controllers.Controllers[request.GetKey()]
-	if !isOk {
-		controllers.Controllers[config.NotFound].Run(conn)
-		return
+	endpoint, params := tree.FindRoute(request.Method, request.Path)
+	if endpoint != nil {
+		request.Params = params
+		endpoint.Run(conn, &request, &response)
+	} else {
+		response.StatusCode = 404
 	}
 
-	endpoint.Run(conn)
-
+	httpProsecc.BuilderResponse(conn, &request, &response)
 }

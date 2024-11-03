@@ -1,16 +1,16 @@
 package controllers
 
 import (
-	"fmt"
 	"net"
+
+	httpProsecc "github.com/codecrafters-io/http-server-starter-go/pkg/http-prosecc"
 )
 
-var root = NewEndpoint("GET", "/", func(conn net.Conn) {
-	response := "HTTP/1.1 200 OK\r\n\r\n"
+var root = NewEndpoint("GET", "/", func(conn net.Conn, req *httpProsecc.Request, res *httpProsecc.Response) {
+	res.StatusCode = 200
+})
 
-	_, err := conn.Write([]byte(response))
-	if err != nil {
-		fmt.Println("Error writing response:", err.Error())
-		return
-	}
+var echo = NewEndpoint("GET", "/echo/:text", func(conn net.Conn, req *httpProsecc.Request, res *httpProsecc.Response) {
+	res.StatusCode = 200
+	res.Body = req.Params["text"]
 })

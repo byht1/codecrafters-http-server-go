@@ -6,14 +6,16 @@ import (
 	httpProsecc "github.com/codecrafters-io/http-server-starter-go/pkg/http-prosecc"
 )
 
+type RunFunc func(conn net.Conn, req *httpProsecc.Request, res *httpProsecc.Response)
+
 type ControllerFunc interface {
 	Run(conn net.Conn)
 }
 
 type Endpoint struct {
-	Method httpProsecc.Method
+	Method string
 	Path   string
-	Run    func(conn net.Conn)
+	Run    RunFunc
 }
 
 type Controller struct {
