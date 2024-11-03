@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strings"
 
 	"github.com/codecrafters-io/http-server-starter-go/controllers"
 	httpProsecc "github.com/codecrafters-io/http-server-starter-go/pkg/http-prosecc"
@@ -43,10 +42,7 @@ func handleConnection(conn net.Conn, tree controllers.Trie) {
 		return
 	}
 
-	originalRequest := strings.Split(string(buffer), "\n")
-	info := strings.Split(originalRequest[0], " ")
-
-	request := httpProsecc.NewRequest(info[0], info[1], info[2])
+	request := httpProsecc.NewRequest(buffer)
 	response := httpProsecc.NewResponse()
 
 	endpoint, params := tree.FindRoute(request.Method, request.Path)

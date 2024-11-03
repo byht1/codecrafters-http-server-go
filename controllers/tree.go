@@ -20,8 +20,9 @@ func NewTrie() *Trie {
 		endpoints: make(map[string]*Endpoint),
 	}}
 
-	trie.AddRoute(root)
-	trie.AddRoute(echo)
+	trie.AddRoute(rootEndpoint)
+	trie.AddRoute(echoEndpoint)
+	trie.AddRoute(userAgentEndpoint)
 
 	return &trie
 }
