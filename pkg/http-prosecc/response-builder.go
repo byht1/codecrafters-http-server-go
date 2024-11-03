@@ -5,11 +5,15 @@ import (
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/codecrafters-io/http-server-starter-go/pkg/compression"
 )
 
 const (
-	ContentType   = "Content-Type"
-	ContentLength = "Content-Length"
+	ContentType     = "Content-Type"
+	ContentLength   = "Content-Length"
+	ContentEncoding = "Content-Encoding"
+	AcceptEncoding  = "Accept-Encoding"
 )
 
 func BuilderResponse(conn net.Conn, req *Request, res *Response) {
@@ -24,6 +28,13 @@ func BuilderResponse(conn net.Conn, req *Request, res *Response) {
 	if len(res.File) != 0 {
 		res.SetHeader(ContentType, "application/octet-stream")
 		bodyBytes = res.File
+	}
+
+	if value, isOk := req.GetHeader(AcceptEncoding); isOk {
+		_, ok := compression.Compression[value]
+		if ok {
+			res.SetHeader(ContentEncoding, value)
+		}
 	}
 
 	res.SetHeader(ContentLength, strconv.Itoa(len(bodyBytes)))
