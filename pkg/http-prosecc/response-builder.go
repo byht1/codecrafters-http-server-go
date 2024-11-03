@@ -31,10 +31,13 @@ func BuilderResponse(conn net.Conn, req *Request, res *Response) {
 	}
 
 	if value, isOk := req.GetHeader(AcceptEncoding); isOk {
-		_, ok := compression.Compression[value]
-		if ok {
-			res.SetHeader(ContentEncoding, value)
+		for _, key := range strings.Split(value, ", ") {
+			_, ok := compression.Compression[key]
+			if ok {
+				res.SetHeader(ContentEncoding, key)
+			}
 		}
+
 	}
 
 	res.SetHeader(ContentLength, strconv.Itoa(len(bodyBytes)))
