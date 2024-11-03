@@ -1,6 +1,8 @@
 package httpProsecc
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"net"
 	"strconv"
@@ -15,6 +17,28 @@ const (
 	ContentEncoding = "Content-Encoding"
 	AcceptEncoding  = "Accept-Encoding"
 )
+
+func gZipData(data []byte) (compressedData []byte, err error) {
+	var b bytes.Buffer
+	gz := gzip.NewWriter(&b)
+
+	_, err = gz.Write(data)
+	if err != nil {
+		return
+	}
+
+	if err = gz.Flush(); err != nil {
+		return
+	}
+
+	if err = gz.Close(); err != nil {
+		return
+	}
+
+	compressedData = b.Bytes()
+
+	return
+}
 
 func BuilderResponse(conn net.Conn, req *Request, res *Response) {
 	protocol := getProtocol(res.StatusCode)
@@ -35,6 +59,10 @@ func BuilderResponse(conn net.Conn, req *Request, res *Response) {
 			_, ok := compression.Compression[key]
 			if ok {
 				res.SetHeader(ContentEncoding, key)
+				compressedData, err := gZipData(bodyBytes)
+				if err == nil {
+					bodyBytes = compressedData
+				}
 			}
 		}
 
